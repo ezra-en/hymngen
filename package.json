@@ -13,7 +13,6 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@capacitor/cli": "^5.7.3",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/adapter-static": "^3.0.1",
 		"@sveltejs/kit": "^2.4.3",
@@ -41,9 +40,6 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@capacitor/android": "^5.7.3",
-		"@capacitor/core": "^5.7.3",
-		"@capacitor/ios": "^5.7.3",
 		"clsx": "^2.1.0",
 		"lucide-svelte": "^0.359.0",
 		"mode-watcher": "^0.3.0",
