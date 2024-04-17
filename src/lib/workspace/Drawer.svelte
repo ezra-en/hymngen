@@ -4,6 +4,6 @@
 
 </script>
 
-<ScrollArea class="h-screen w-1/5 xl:w-1/4">
+<ScrollArea class="h-screen w-1/5 xl:w-1/4 shadow-md px-2">
   <slot/>
 </ScrollArea>
