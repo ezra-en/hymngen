@@ -40,7 +40,7 @@
 		></Input>
 		<Button variant="outline" disabled={!valid} on:click={() => exportSongPPTX(songData.number)}>
 			{#if !valid}
-				Enter Song #
+				Enter Song # 
 			{:else}
 				Get {songData.title}
 			{/if}
