@@ -8,6 +8,7 @@
 	import { exportSongPPTX } from '$lib/songbook/renderers';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { Separator } from '$lib/components/ui/separator';
+	import { toast } from 'svelte-sonner';
 
 	let songStr: string;
 	let valid: boolean;
@@ -31,6 +32,11 @@
 			console.error(`err: ${songCheck.error}`);
 		}
 	}
+
+	function generate() {
+		toast(`Generating AH${songData.number} PPTX`)
+		exportSongPPTX(songData.number)
+	}
 </script>
 
 <main class="flex flex-col gap-1.5">
@@ -38,7 +44,7 @@
 	<div class="flex flex-row gap-3">
 		<Input id="song" type="number" placeholder="AH000" bind:value on:input={onEdit} class="w-28"
 		></Input>
-		<Button variant="outline" disabled={!valid} on:click={() => exportSongPPTX(songData.number)}>
+		<Button variant="outline" disabled={!valid} on:click={generate}>
 			{#if !valid}
 				Enter Song # 
 			{:else}

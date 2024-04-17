@@ -132,7 +132,7 @@ export function exportSongPPTX(songNum: number = 0, prefix: string = '', songDat
 			});
 
 			pptx.writeFile({
-				fileName: `${prefix.trim()} ${songbook.prefix}${songFetch.number} ${songFetch.title}`
+				fileName: `${songbook.prefix}${songFetch.number?.toString().padStart(3, '0')} ${songFetch.title}`
 			});
 		} else console.error(songParse.error);
 	} else {
