@@ -7,16 +7,37 @@
     "distDir": "../build"
   },
   "package": {
-    "productName": "1-svelte-capacitor",
+    "productName": "sdah-hymngen",
     "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
-      "all": false
+      "all": false,
+      "fs": {
+        "all": false,
+        "copyFile": false,
+        "createDir": false,
+        "exists": true,
+        "readDir": false,
+        "readFile": false,
+        "removeDir": false,
+        "removeFile": false,
+        "renameFile": false,
+        "scope": [],
+        "writeFile": true
+      },
+      "dialog": {
+        "all": false,
+        "ask": true,
+        "confirm": true,
+        "message": false,
+        "open": true,
+        "save": true
+      }
     },
     "bundle": {
       "active": true,
-      "category": "DeveloperTool",
+      "category": "GraphicsAndDesign",
       "copyright": "",
       "deb": {
         "depends": []
@@ -29,8 +50,8 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
-      "longDescription": "",
+      "identifier": "dev.ezraen.tools.hymngen",
+      "longDescription": "PowerPoint generator for songs in the SDA Hymnal.",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -55,11 +76,11 @@
     },
     "windows": [
       {
+        "title": "HymnGen",
         "fullscreen": false,
-        "height": 720,
-        "resizable": true,
-        "title": "sticky-note",
-        "width": 1080
+        "width": 720,
+        "height": 480,
+        "resizable": true
       }
     ]
   }

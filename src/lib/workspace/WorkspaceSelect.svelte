@@ -11,11 +11,7 @@
 	];
 </script>
 
-<div class="flex flex-row gap-4 pl-4 pr-2 py-4">
-	<Avatar.Root>
-		<Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />
-		<Avatar.Fallback>CN</Avatar.Fallback>
-	</Avatar.Root>
+<div class="flex flex-row py-4 px-2">
 	<Select.Root>
 		<Select.Trigger class="w-full border-none">
 			<Select.Value placeholder="Select a fruit" />
