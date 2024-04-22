@@ -54,7 +54,7 @@
 	</div>
 	{#if valid}
 		{#key songData}
-			<ScrollArea class="flex h-[21rem] w-[595px] gap-5 rounded-md border p-4">
+			<ScrollArea class="flex h-[21rem] w-[37.3rem] gap-5 rounded-md border p-4">
 				{#each parseSong(songData) as slide}
 					<Label for={slide.name}>{slide.name}</Label>
 					<div class="h-[265px] flex flex-col align-middle justify-start overflow-auto">

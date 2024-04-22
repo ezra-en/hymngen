@@ -12,13 +12,13 @@
 
 import {exportSongPPTX} from './src/lib/songbook/renderers'
 
-exportSongPPTX(318, '1 SS 1 - '); 
-exportSongPPTX(485, '2 SS 2 - ') 
+// exportSongPPTX(318, '1 SS 1 - '); 
+// exportSongPPTX(485, '2 SS 2 - ') 
 // exportSongPPTX(, '3 Extra - ') 
-exportSongPPTX(493, '4 SS Opening - ')
-exportSongPPTX(290, '5 Divine 1 - ') 
-exportSongPPTX(316, '6 Divine Opening - ') 
-exportSongPPTX(516, '7 Response - ')
+// exportSongPPTX(493, '4 SS Opening - ')
+// exportSongPPTX(290, '5 Divine 1 - ') 
+// exportSongPPTX(316, '6 Divine Opening - ') 
+// exportSongPPTX(516, '7 Response - ')
 // exportSongPPTX(403, 'Communion - ')
 // exportSongPPTX(336, 'Communion - ');
 
@@ -68,3 +68,37 @@ exportSongPPTX(516, '7 Response - ')
 // const matches = setup.match(detectSong)
 
 // matches
+
+
+const d = new Date(Date.now())
+.toLocaleDateString().split('/')
+d.reverse()
+const date = d.join('-')
+console.log(date)
+
+
+function dateFormat(nowDate: Date) {
+  console.log(nowDate)
+  return nowDate.toLocaleDateString().split('/').reverse().join('-')
+}
+
+const t = new Date('2024-04-21')
+console.log(t.getDate())
+console.log(t.getDay())
+// const s = new Date(t.setDate(t.getDate() + (6 - t.getDay())))
+// console.log(t.getDate())
+// console.log(s.toLocaleDateString())
+
+function nextSabbath(nowDate: Date) {
+  const today = new Date(nowDate)
+  console.log(today)
+  const nextSabbath = new Date(today.setDate(today.getDate() + (6 - t.getDay())))
+  console.log(today)
+  return nextSabbath
+}
+
+console.log(nextSabbath(t))
+
+// console.log(t.toLocaleDateString())
+
+console.log(dateFormat(nextSabbath(Date.now())))

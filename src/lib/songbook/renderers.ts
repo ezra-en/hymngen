@@ -1,3 +1,4 @@
+// import PptxGenJS from 'pptxgenjs'
 
 function addSlideNumber(currentSlide: number, totalSlides: number, slide: PptxGenJS.Slide) {
 	slide.addText(`${currentSlide}/${totalSlides}`, {
@@ -5,7 +6,9 @@ function addSlideNumber(currentSlide: number, totalSlides: number, slide: PptxGe
 		y: '90%',
 		fontFace: 'Montserrat ExtraBold',
 		fontSize: 24,
-		bold: true
+		bold: true,
+		w: 1.0,
+		h: 0.5
 	});
 }
 
@@ -97,6 +100,8 @@ export function exportSongPPTX(songNum: number = 0, prefix: string = '', songDat
 				);
 			});
 
+			// programmatically set pptx.layout?
+
 			pptx.writeFile({
 				fileName: `${prefix} ${songFetch.title}`
 			});
@@ -131,8 +136,21 @@ export function exportSongPPTX(songNum: number = 0, prefix: string = '', songDat
 				);
 			});
 
+			function nextSabbath(nowDate: Date) {
+				const today = new Date(nowDate)
+				console.log(today)
+				const nextSabbath = new Date(today.setDate(today.getDate() + (6 - today.getDay())))
+				console.log(today)
+				return nextSabbath
+			}
+
+			function dateFormat(nowDate: Date) {
+				console.log(nowDate)
+				return nowDate.toLocaleDateString().split('/').reverse().join('-')
+			}
+
 			pptx.writeFile({
-				fileName: `${songbook.prefix}${songFetch.number?.toString().padStart(3, '0')} ${songFetch.title}`
+				fileName: `${dateFormat(nextSabbath(new Date()))} ${songbook.prefix}${songFetch.number?.toString().padStart(3, '0')} ${songFetch.title}`
 			});
 		} else console.error(songParse.error);
 	} else {
