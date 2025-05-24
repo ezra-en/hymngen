@@ -3,12 +3,13 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea as pre } from '$lib/components/ui/textarea';
-	import { getSong, parseSong } from '$lib/songbook/parsers';
+	import { getSongNum, getSongTitle, parseSong } from '$lib/songbook/parsers';
 	import { icoHymnSchema, type icoHymn } from '$lib/songbook/types';
 	import { exportSongPPTX } from '$lib/songbook/renderers';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { Separator } from '$lib/components/ui/separator';
 	import { toast } from 'svelte-sonner';
+	import Search from '$lib/components/custom/Search.svelte';
 
 	let songStr: string;
 	let valid: boolean;
@@ -16,9 +17,13 @@
 
 	let checkSong: boolean;
 
-	let value: number;
-	function onEdit() {
-		const songFetch = getSong(value);
+	// let songNum: number;
+	let song: number
+
+	// export function onEdit() {
+	$: {
+		const songFetch = getSongNum(song);
+		// const songFetch = getSongTitle(songTitle);
 		const songCheck = icoHymnSchema.safeParse(songFetch);
 		console.log(songCheck);
 		checkSong = false;
@@ -34,19 +39,20 @@
 	}
 
 	function generate() {
-		toast(`Generating AH${songData.number} PPTX`)
-		exportSongPPTX(songData.number)
+		toast(`Generating AH${songData.number} PPTX`);
+		exportSongPPTX(songData.number);
 	}
 </script>
 
 <main class="flex flex-col gap-1.5">
 	<Label for="song">Song Number</Label>
 	<div class="flex flex-row gap-3">
-		<Input id="song" type="number" placeholder="AH000" bind:value on:input={onEdit} class="w-28"
-		></Input>
+		<!-- <Input id="song" type="number" placeholder="AH000" bind:value on:input={onEdit} class="w-28"
+		></Input> -->
+		<Search bind:setSelectedSong={song} />
 		<Button variant="outline" disabled={!valid} on:click={generate}>
 			{#if !valid}
-				Enter Song # 
+				Enter Song #
 			{:else}
 				Get {songData.title}
 			{/if}
@@ -57,13 +63,12 @@
 			<ScrollArea class="flex h-[21rem] w-[37.3rem] gap-5 rounded-md border p-4">
 				{#each parseSong(songData) as slide}
 					<Label for={slide.name}>{slide.name}</Label>
-					<div class="h-[265px] flex flex-col align-middle justify-start overflow-auto">
-						<pre 
-						style="font-family: Albert Sans" 
-						class="w-full align-middle text-center text-3xl leading-relaxed whitespace-pre-wrap"
-						>{slide.text}</pre>
+					<div class="flex h-[265px] flex-col justify-start overflow-auto align-middle">
+						<pre
+							style="font-family: Albert Sans"
+							class="w-full whitespace-pre-wrap text-center align-middle text-3xl leading-relaxed">{slide.text}</pre>
 					</div>
-				
+
 					<Separator></Separator>
 				{/each}
 			</ScrollArea>

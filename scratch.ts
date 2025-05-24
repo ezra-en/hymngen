@@ -69,36 +69,40 @@ import {exportSongPPTX} from './src/lib/songbook/renderers'
 
 // matches
 
+// Sabbath detection
 
-const d = new Date(Date.now())
-.toLocaleDateString().split('/')
-d.reverse()
-const date = d.join('-')
-console.log(date)
+// const d = new Date(Date.now())
+// .toLocaleDateString().split('/')
+// d.reverse()
+// const date = d.join('-')
+// console.log(date)
 
 
-function dateFormat(nowDate: Date) {
-  console.log(nowDate)
-  return nowDate.toLocaleDateString().split('/').reverse().join('-')
-}
+// function dateFormat(nowDate: Date) {
+//   console.log(nowDate)
+//   return nowDate.toLocaleDateString().split('/').reverse().join('-')
+// }
 
-const t = new Date('2024-04-21')
-console.log(t.getDate())
-console.log(t.getDay())
-// const s = new Date(t.setDate(t.getDate() + (6 - t.getDay())))
+// const t = new Date('2024-04-21')
 // console.log(t.getDate())
-// console.log(s.toLocaleDateString())
+// console.log(t.getDay())
+// // const s = new Date(t.setDate(t.getDate() + (6 - t.getDay())))
+// // console.log(t.getDate())
+// // console.log(s.toLocaleDateString())
 
-function nextSabbath(nowDate: Date) {
-  const today = new Date(nowDate)
-  console.log(today)
-  const nextSabbath = new Date(today.setDate(today.getDate() + (6 - t.getDay())))
-  console.log(today)
-  return nextSabbath
-}
+// function nextSabbath(nowDate: Date) {
+//   const today = new Date(nowDate)
+//   console.log(today)
+//   const nextSabbath = new Date(today.setDate(today.getDate() + (6 - t.getDay())))
+//   console.log(today)
+//   return nextSabbath
+// }
 
-console.log(nextSabbath(t))
+// console.log(nextSabbath(t))
 
-// console.log(t.toLocaleDateString())
+// // console.log(t.toLocaleDateString())
 
-console.log(dateFormat(nextSabbath(Date.now())))
+// console.log(dateFormat(nextSabbath(Date.now())))
+
+
+

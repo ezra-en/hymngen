@@ -6,24 +6,26 @@ export const icoInfoSchema = z.object({
 });
 
 export const icoStanzaSchema = z.object({
-	type: z.literal('Verse'),
+	type: z.string(), //z.literal('Verse'),
 	verseNo: z.string(), // string of number
 	lines: z.string().array()
 });
+export type icoStanza = z.infer<typeof icoStanzaSchema> 	
 
 export const icoRefrainSchema = z.object({
-  type: z.literal('Refrain').or(z.literal('Chorus')),
-	lines: z.string().array()
+	type: z.string(), //z.literal('Refrain').or(z.literal('Chorus')),
+	lines: z.string().array(),
+	verseNo: z.undefined().optional() // string of number
 });
-export type icoRefrain = z.infer<typeof icoRefrainSchema>
-export const icoVerseSchema = z.union([icoStanzaSchema, icoRefrainSchema])
-export type icoVerse = z.infer<typeof icoVerseSchema>
+export type icoRefrain = z.infer<typeof icoRefrainSchema>;
+export const icoVerseSchema = z.union([icoStanzaSchema, icoRefrainSchema]);
+export type icoVerse = z.infer<typeof icoVerseSchema>;
 
 export const icoHymnSchema = z.object({
-	number: z.number().optional(),
+	number: z.number(),
 	title: z.string(),
 	verses: z.union([icoStanzaSchema, icoRefrainSchema]).array(),
-	info: icoInfoSchema.array().optional()
+	info: icoInfoSchema.array()
 });
 export type icoHymn = z.infer<typeof icoHymnSchema>;
 
