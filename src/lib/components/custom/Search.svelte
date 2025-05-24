@@ -27,32 +27,129 @@
 			document.getElementById(triggerId)?.focus();
 		});
 	}
-
 	import FlexSearch from 'flexsearch';
-
+	// Create an optimized index for different search types
 	let index = new FlexSearch.Document({
 		document: {
 			id: 'number',
-			index: ['title', 'verses:lines']
+			index: [
+				{
+					field: 'number',
+					tokenize: 'strict',
+					optimize: true,
+					resolution: 9
+				},
+				{
+					field: 'title',
+					tokenize: 'forward',
+					optimize: true,
+					resolution: 9
+				},
+				{
+					field: 'verseContent',
+					tokenize: 'full',
+					optimize: true,
+					resolution: 9,
+					minlength: 3,
+					context: {
+						depth: 2,
+						resolution: 9
+					}
+				}
+			]
 		},
-		tokenize: 'forward'
-		// store: true
+		tokenize: 'reverse',
+		suggest: true
 	});
-	// console.log(...hymns);
+
+	// Process hymns and add to index
 	for (const hymn of hymns) {
-		index.add(hymn);
+		// Combine all verse content for full-text search with verse numbers
+		const verseContent = hymn.verses
+			.map((verse, idx) => `Verse ${idx + 1}: ${verse.lines.join(' ')}`)
+			.join('\n');
+
+		index.add({
+			...hymn,
+			verseContent
+		});
 	}
-	console.log(index);
 
 	let filteredResults: any[] = [];
 	let searchString = '';
+	interface GroupedResults {
+		byNumber: icoHymn[];
+		byTitle: icoHymn[];
+		byContent: icoHymn[];
+	}
+
+	// Process search results
 	$: {
 		if (searchString === '') {
 			filteredResults = [];
 		} else {
-			filteredResults = index.search(searchString, 15);
+			// Search across all fields
+			const results = index.search(searchString, {
+				enrich: true,
+				suggest: true,
+				limit: 15
+			}); // Group results by field type
+			const grouped: GroupedResults = {
+				byNumber: [],
+				byTitle: [],
+				byContent: []
+			};
+
+			const seenHymns = new Set<number>();
+			const contentScores = new Map<number, number>();
+
+			results.forEach((result) => {
+				result.result.forEach((hit) => {
+					const hymn = hymns[hit - 1]; // Adjust for 0-based array
+
+					if (result.field === 'verseContent') {
+						// Calculate relevance score based on exact phrase matches
+						const score = hymn.verses.reduce((total, verse) => {
+							const content = verse.lines.join(' ').toLowerCase();
+							const searchTerms = searchString.toLowerCase().split(' ');
+
+							// Exact phrase match gets highest score
+							if (content.includes(searchString.toLowerCase())) {
+								return total + 10;
+							}
+
+							// All words in order but not consecutive still good
+							if (searchTerms.every((term) => content.includes(term))) {
+								return total + 5;
+							}
+
+							// Individual word matches get lower score
+							return total + searchTerms.filter((term) => content.includes(term)).length;
+						}, 0);
+
+						contentScores.set(hymn.number, score);
+					}
+
+					if (!seenHymns.has(hymn.number)) {
+						if (result.field === 'number') {
+							grouped.byNumber.push(hymn);
+						} else if (result.field === 'title') {
+							grouped.byTitle.push(hymn);
+						} else if (result.field === 'verseContent') {
+							grouped.byContent.push(hymn);
+						}
+						seenHymns.add(hymn.number);
+					}
+				});
+			});
+
+			// Sort content results by relevance score
+			grouped.byContent.sort((a, b) => {
+				return (contentScores.get(b.number) || 0) - (contentScores.get(a.number) || 0);
+			});
+
+			filteredResults = grouped;
 		}
-		console.log('"', searchString, '"', 'fi: ', filteredResults);
 	}
 </script>
 
@@ -69,60 +166,91 @@
 			<CaretSort class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 		</Button>
 	</Popover.Trigger>
-	<Popover.Content class="w-[200px] p-0" side="bottom" avoidCollisions={false}>
+	<Popover.Content class="min-w-[200px] p-0" side="bottom" avoidCollisions={false} align="start">
 		<Command.Root shouldFilter={false}>
 			<Command.Input placeholder="Search songs..." class="h-9" bind:value={searchString} />
-			<!-- <Command.Empty>No song found.</Command.Empty> -->
+			<Command.Empty>No song found.</Command.Empty>
 			<Command.List>
-				{#key filteredResults}
-					{#each filteredResults as res}
-						<!-- <p>{JSON.stringify(res)}</p> -->
-						{#if res.field == 'title'}
-							{#each res.result as hymnNum}
-								{@const hymn = hymns[hymnNum - 1]}
-								<!-- <Command.Item> -->
-								<p>
-									{hymn.number}: {hymn.title}
-								</p>
-								<!-- </Command.Item>  -->
-								<!-- <Command.Item
+				{#if !filteredResults?.byNumber && searchString !== ''}
+					<Command.Empty>No song found.</Command.Empty>
+				{:else}
+					{#if filteredResults.byNumber?.length > 0}
+						<Command.Group heading="By Number">
+							{#each filteredResults.byNumber as hymn}
+								<Command.Item
 									value={`${hymn.number}: ${hymn.title}`}
-									onSelect={(selectedValue) => {
-										setSelectedSong = Number(selectedValue.split(':')[0]);
+									onSelect={() => {
+										setSelectedSong = hymn.number;
 										closeAndFocusTrigger(ids.trigger);
 									}}
 								>
 									<Check
 										class={cn(
-											'mr-2 max-h-4 max-w-4',
+											'mr-2 h-4 w-4',
 											setSelectedSong !== hymn.number && 'text-transparent'
 										)}
 									/>
-									<p>
-										{hymn.number}: {hymn.title}
-									</p>
-								</Command.Item>  -->
+									<div class="flex flex-col">
+										<div>{hymn.number}: {hymn.title}</div>
+									</div>
+								</Command.Item>
 							{/each}
-						{/if}
-					{/each}
-					<!-- <VirtualList bind:this={virtList} width="100%" height={600} itemCount={hymns.length} itemSize={50}>
-          <Command.Item slot="item" let:index let:style {style}
-					value={`${hymns[index].number}: ${hymns[index].title}`}
-					onSelect={(selectedValue) => {
-						setSelectedSong = Number(selectedValue.split(':')[0]);
-						closeAndFocusTrigger(ids.trigger);
-						}}
-						>
-						<Check
-						class={cn(
-							'mr-2 max-h-4 max-w-4',
-							setSelectedSong !== hymns[index].number && 'text-transparent'
-							)}
-							/>
-						{hymns[index].number}: {hymns[index].title}
-						</Command.Item>
-						</VirtualList> -->
-				{/key}
+						</Command.Group>
+					{/if}
+
+					{#if filteredResults.byTitle?.length > 0}
+						<Command.Group heading="By Title">
+							{#each filteredResults.byTitle as hymn}
+								<Command.Item
+									value={`${hymn.number}: ${hymn.title}`}
+									onSelect={() => {
+										setSelectedSong = hymn.number;
+										closeAndFocusTrigger(ids.trigger);
+									}}
+								>
+									<Check
+										class={cn(
+											'mr-2 h-4 w-4',
+											setSelectedSong !== hymn.number && 'text-transparent'
+										)}
+									/>
+									<div class="flex flex-col">
+										<div>{hymn.number}: {hymn.title}</div>
+									</div>
+								</Command.Item>
+							{/each}
+						</Command.Group>
+					{/if}
+
+					{#if filteredResults.byContent?.length > 0}
+						<Command.Group heading="In Lyrics">
+							{#each filteredResults.byContent as hymn}
+								<Command.Item
+									value={`${hymn.number}: ${hymn.title}`}
+									onSelect={() => {
+										setSelectedSong = hymn.number;
+										closeAndFocusTrigger(ids.trigger);
+									}}
+								>
+									<Check
+										class={cn(
+											'mr-2 h-4 w-4',
+											setSelectedSong !== hymn.number && 'text-transparent'
+										)}
+									/>
+									<div class="flex flex-col">
+										<div>{hymn.number}: {hymn.title}</div>
+										{#if hymn.verses?.[0]?.lines?.[0]}
+											<div class="truncate text-sm text-muted-foreground">
+												{hymn.verses[0].lines[0]}
+											</div>
+										{/if}
+									</div>
+								</Command.Item>
+							{/each}
+						</Command.Group>
+					{/if}
+				{/if}
 			</Command.List>
 		</Command.Root>
 	</Popover.Content>
