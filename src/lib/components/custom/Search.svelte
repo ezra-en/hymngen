@@ -1,22 +1,34 @@
 <script lang="ts">
 	import Check from 'svelte-radix/Check.svelte';
 	import CaretSort from 'svelte-radix/CaretSort.svelte';
-	import { tick } from 'svelte';
+	import { tick, onMount } from 'svelte';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { cn } from '$lib/utils.js';
-	import { hymns } from '$lib/songbook/parsers';
+	import { cn } from '$lib/utils.js';	import { hymns } from '$lib/songbook/parsers';
 	import type { icoHymn } from '$lib/songbook/types';
+	import { addRecentHymn, getRecentHymns } from '$lib/cache/hymnCache';
 
 	let open = false;
 	export let setSelectedSong = 0;
+	let recentHymns: icoHymn[] = [];
 
-	let selectedValue = 'Find a song...';
-	$: {
+	let selectedValue = 'Find a song...';	$: {
 		const song = hymns.find((hymn) => hymn.number === setSelectedSong);
-		if (song) selectedValue = `${song.number}: ${song.title}`;
+		if (song) {
+			selectedValue = `${song.number}: ${song.title}`;
+			addRecentHymn(song).then(() => {
+				getRecentHymns().then(hymns => {
+					recentHymns = hymns;
+				});
+			});
+		}
 	}
+
+	// Load recent hymns on mount
+	onMount(async () => {
+		recentHymns = await getRecentHymns();
+	});
 
 	// We want to refocus the trigger button when the user selects
 	// an item from the list so users can continue navigating the
@@ -167,11 +179,26 @@
 		</Button>
 	</Popover.Trigger>
 	<Popover.Content class="min-w-[200px] p-0" side="bottom" avoidCollisions={false} align="start">
-		<Command.Root shouldFilter={false}>
-			<Command.Input placeholder="Search songs..." class="h-9" bind:value={searchString} />
+		<Command.Root shouldFilter={false}>			<Command.Input placeholder="Search songs..." class="h-9" bind:value={searchString} />
 			<Command.Empty>No song found.</Command.Empty>
 			<Command.List>
-				{#if !filteredResults?.byNumber && searchString !== ''}
+				{#if searchString === '' && recentHymns.length > 0}
+					<Command.Group heading="Recent">
+						{#each recentHymns as hymn}
+							<Command.Item
+								value={`${hymn.number}: ${hymn.title}`}
+								onSelect={() => {
+									setSelectedSong = hymn.number;
+									closeAndFocusTrigger(ids.trigger);
+								}}
+							>
+								<div class="flex flex-col">
+									<div>{hymn.number}: {hymn.title}</div>
+								</div>
+							</Command.Item>
+						{/each}
+					</Command.Group>
+				{:else if !filteredResults?.byNumber && searchString !== ''}
 					<Command.Empty>No song found.</Command.Empty>
 				{:else}
 					{#if filteredResults.byNumber?.length > 0}
@@ -184,12 +211,6 @@
 										closeAndFocusTrigger(ids.trigger);
 									}}
 								>
-									<Check
-										class={cn(
-											'mr-2 h-4 w-4',
-											setSelectedSong !== hymn.number && 'text-transparent'
-										)}
-									/>
 									<div class="flex flex-col">
 										<div>{hymn.number}: {hymn.title}</div>
 									</div>

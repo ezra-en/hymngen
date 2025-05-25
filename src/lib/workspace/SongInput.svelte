@@ -10,6 +10,9 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import { toast } from 'svelte-sonner';
 	import Search from '$lib/components/custom/Search.svelte';
+	import * as Carousel from '$lib/components/ui/carousel/index.js';
+	import type { CarouselAPI } from '$lib/components/ui/carousel/context';
+	import { AspectRatio } from '$lib/components/ui/aspect-ratio';
 
 	let songStr: string;
 	let valid: boolean;
@@ -17,10 +20,8 @@
 
 	let checkSong: boolean;
 
-	// let songNum: number;
-	let song: number
+	let song: number;
 
-	// export function onEdit() {
 	$: {
 		const songFetch = getSongNum(song);
 		// const songFetch = getSongTitle(songTitle);
@@ -42,36 +43,100 @@
 		toast(`Generating AH${songData.number} PPTX`);
 		exportSongPPTX(songData.number);
 	}
+
+	let api: CarouselAPI;
+
+	$: if (api) {
+		let current = api.selectedScrollSnap() + 1;
+		api.on('select', () => {
+			current = api.selectedScrollSnap() + 1;
+		});
+
+		api.on('pointerDown', () => {
+			// api.scrollNext();
+		});
+
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowRight' || e.key === 'Space') {
+				api.scrollNext();
+			} else if (e.key === 'ArrowLeft') {
+				api.scrollPrev();
+			}
+		});
+	}
+
+	let carouselContainer: HTMLElement;
 </script>
 
 <main class="flex flex-col gap-1.5">
 	<Label for="song">Song Number</Label>
 	<div class="flex flex-row gap-3">
-		<!-- <Input id="song" type="number" placeholder="AH000" bind:value on:input={onEdit} class="w-28"
-		></Input> -->
 		<Search bind:setSelectedSong={song} />
 		<Button variant="outline" disabled={!valid} on:click={generate}>
 			{#if !valid}
 				Enter Song #
 			{:else}
-				Get {songData.title}
+				Download {songData.title}.pptx
+			{/if}
+		</Button>
+		<Button
+			variant="outline"
+			disabled={!valid}
+			on:click={() => {
+				if (carouselContainer) {
+					if (document.fullscreenElement) {
+						document.exitFullscreen();
+					} else {
+						carouselContainer.requestFullscreen();
+					}
+				}
+			}}
+		>
+			{#if document.fullscreenElement}
+				Exit Fullscreen
+			{:else}
+				Present
 			{/if}
 		</Button>
 	</div>
 	{#if valid}
 		{#key songData}
-			<ScrollArea class="flex h-[21rem] w-[37.3rem] gap-5 rounded-md border p-4">
-				{#each parseSong(songData) as slide}
-					<Label for={slide.name}>{slide.name}</Label>
-					<div class="flex h-[265px] flex-col justify-start overflow-auto align-middle">
-						<pre
-							style="font-family: Albert Sans"
-							class="w-full whitespace-pre-wrap text-center align-middle text-3xl leading-relaxed">{slide.text}</pre>
-					</div>
-
-					<Separator></Separator>
-				{/each}
-			</ScrollArea>
+			<div bind:this={carouselContainer} class="h-full w-full">
+				<Carousel.Root
+					class="mx-auto aspect-video h-full w-full transition-all duration-300"
+					bind:api
+					opts={{
+						align: 'center',
+						watchDrag: false,
+						containScroll: false
+					}}
+				>
+					<Carousel.Content class={`group ml-0 h-full w-full`}>
+						{#each parseSong(songData) as slide}
+							<Carousel.Item
+								class="h-full w-full rounded-sm border border-gray-200 bg-white p-4"
+								style="font-family: Albert Sans"
+								id={slide.name}
+							>
+								<AspectRatio ratio={16 / 9}>
+									<div class="presentation-content h-full">
+										<div class="mb-4 text-center">
+											<h2 class="text-xl font-normal">{slide.name}</h2>
+										</div>
+										<div class="flex flex-1 items-center justify-center">
+											<pre
+												style="font-family: Albert Sans"
+												class="w-full whitespace-pre-wrap text-center text-3xl">{slide.text}</pre>
+										</div>
+									</div>
+								</AspectRatio>
+							</Carousel.Item>
+						{/each}
+					</Carousel.Content>
+					<Carousel.Previous />
+					<Carousel.Next />
+				</Carousel.Root>
+			</div>
 		{/key}
 	{/if}
 </main>

@@ -75,4 +75,18 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  :root {
+    --presentation-scale: 1;
+  }
+
+  :fullscreen {
+    --presentation-scale: 2.5;
+  }
+
+  .presentation-content {
+    transform: scale(var(--presentation-scale));
+    transform-origin: top center;
+    transition: transform 0.15s ease;
+  }
 }
