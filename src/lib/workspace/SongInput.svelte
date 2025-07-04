@@ -13,6 +13,8 @@
 	import * as Carousel from '$lib/components/ui/carousel/index.js';
 	import type { CarouselAPI } from '$lib/components/ui/carousel/context';
 	import { AspectRatio } from '$lib/components/ui/aspect-ratio';
+	import Fade from 'embla-carousel-fade';
+	import { Copy } from 'lucide-svelte';
 
 	let songStr: string;
 	let valid: boolean;
@@ -110,6 +112,7 @@
 						watchDrag: false,
 						containScroll: false
 					}}
+					plugins={[Fade({})]}
 				>
 					<Carousel.Content class={`group ml-0 h-full w-full`}>
 						{#each parseSong(songData) as slide}
@@ -119,7 +122,21 @@
 								id={slide.name}
 							>
 								<AspectRatio ratio={16 / 9}>
-									<div class="presentation-content h-full">
+									<div class="presentation-content relative h-full">
+										{#if !document.fullscreenElement}
+											<Button
+												class="absolute right-2 top-2 z-10 h-7 w-7 px-1 text-slate-400"
+												size="sm"
+												variant="outline"
+												on:click={() => {
+													navigator.clipboard.writeText(slide.text);
+													toast('Copied verse text to clipboard!');
+												}}
+												aria-label="Copy verse text"
+											>
+												<Copy />
+											</Button>
+										{/if}
 										<div class="mb-4 text-center">
 											<h2 class="text-xl font-normal">{slide.name}</h2>
 										</div>

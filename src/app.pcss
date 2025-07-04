@@ -90,3 +90,13 @@
     transition: transform 0.15s ease;
   }
 }
+
+/* Add fade transition styles */
+.embla-fade .embla__slide {
+  opacity: 0;
+  transition: opacity 500ms ease-in-out;
+}
+
+.embla-fade .embla__slide[data-active="true"] {
+  opacity: 1;
+}
