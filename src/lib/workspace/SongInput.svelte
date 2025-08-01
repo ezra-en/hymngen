@@ -13,8 +13,10 @@
 	import * as Carousel from '$lib/components/ui/carousel/index.js';
 	import type { CarouselAPI } from '$lib/components/ui/carousel/context';
 	import { AspectRatio } from '$lib/components/ui/aspect-ratio';
+
 	import Fade from 'embla-carousel-fade';
 	import { Copy } from 'lucide-svelte';
+	import { onMount, onDestroy } from 'svelte';
 
 	let songStr: string;
 	let valid: boolean;
@@ -48,24 +50,41 @@
 
 	let api: CarouselAPI;
 
+	let current = 1;
+	let totalSlides = 0;
+
+	// Update totalSlides when songData changes
+	$: if (songData) {
+		totalSlides = parseSong(songData).length;
+	}
+
+	// Set up carousel API listeners when api becomes available
 	$: if (api) {
-		let current = api.selectedScrollSnap() + 1;
+		current = api.selectedScrollSnap() + 1;
 		api.on('select', () => {
 			current = api.selectedScrollSnap() + 1;
 		});
-
-		api.on('pointerDown', () => {
-			// api.scrollNext();
-		});
-
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'ArrowRight' || e.key === 'Space') {
-				api.scrollNext();
-			} else if (e.key === 'ArrowLeft') {
-				api.scrollPrev();
-			}
-		});
 	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (!api) return;
+		if (e.key === 'ArrowRight' || e.key === ' ') {
+			api.scrollNext();
+		} else if (e.key === 'ArrowLeft') {
+			api.scrollPrev();
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('keydown', handleKeydown);
+		return () => {
+			document.removeEventListener('keydown', handleKeydown);
+		};
+	});
+
+	onDestroy(() => {
+		document.removeEventListener('keydown', handleKeydown);
+	});
 
 	let carouselContainer: HTMLElement;
 </script>
@@ -112,7 +131,7 @@
 						watchDrag: false,
 						containScroll: false
 					}}
-					plugins={[Fade({})]}
+					plugins={[Fade({ fade: true, crossFade: true })]}
 				>
 					<Carousel.Content class={`group ml-0 h-full w-full`}>
 						{#each parseSong(songData) as slide}
@@ -136,6 +155,11 @@
 											>
 												<Copy />
 											</Button>
+											<div
+												class="absolute left-2 top-2 z-10 rounded-md bg-black/50 px-2 py-1 text-sm text-white"
+											>
+												{current} / {totalSlides}
+											</div>
 										{/if}
 										<div class="mb-4 text-center">
 											<h2 class="text-xl font-normal">{slide.name}</h2>
