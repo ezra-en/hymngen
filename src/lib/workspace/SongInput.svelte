@@ -136,7 +136,7 @@
 					<Carousel.Content class={`group ml-0 h-full w-full`}>
 						{#each parseSong(songData) as slide}
 							<Carousel.Item
-								class="h-full w-full rounded-sm border border-gray-200 bg-white p-4"
+								class="h-full w-full rounded-sm border border-border bg-card p-4"
 								style="font-family: Albert Sans"
 								id={slide.name}
 							>
@@ -144,7 +144,7 @@
 									<div class="presentation-content relative h-full">
 										{#if !document.fullscreenElement}
 											<Button
-												class="absolute right-2 top-2 z-10 h-7 w-7 px-1 text-slate-400"
+												class="absolute right-2 top-2 z-10 h-7 w-7 px-1 text-muted-foreground"
 												size="sm"
 												variant="outline"
 												on:click={() => {
